@@ -1,0 +1,11 @@
+{
+  "name": "tomcat7_rhel",
+  "version": "2.6.1",
+  "ignore": [
+    "*.md",
+    "Gemfile*",
+    "spec",
+    "Rakefile"
+  ],
+  "private": "true"
+}
