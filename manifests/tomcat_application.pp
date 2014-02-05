@@ -8,7 +8,7 @@ define tomcat7_rhel::tomcat_application(
   $tomcat_manager = false,
   $tomcat_admin_user = "tomcat",
   $tomcat_admin_password = "s3cr3t",
-  $tomcat_manager_allow_ip = "127\.0\.0\.1|0:0:0:0:0:0:0:1",
+  $tomcat_manager_allow_ip = "127.0.0.1|0:0:0:0:0:0:0:1",
   $tomcat_manager_deny_ip = "",
   $server_xml_engine_config = "",
   $disable_access_log = false,
