@@ -1,6 +1,6 @@
 {
   "name": "tomcat7_rhel",
-  "version": "2.6.2",
+  "version": "2.6.3",
   "ignore": [
     "*.md",
     "Gemfile*",
