@@ -1,5 +1,5 @@
 class tomcat7_rhel ( $manage_java = true ){
-  include tomcat7_rhel::jpackage_repo
+  include tomcat7_rhel::devops_repo
 
   if $manage_java {
     package { 'java-1.7.0-openjdk':
@@ -11,7 +11,7 @@ class tomcat7_rhel ( $manage_java = true ){
     }
     package { 'tomcat7':
       ensure  => installed,
-      require => [Package['java-1.7.0-openjdk'], Yumrepo['jpackage']],
+      require => [Package['java-1.7.0-openjdk'], Yumrepo['devopskoulu']],
     }
   } else {
     package { 'tomcat7':

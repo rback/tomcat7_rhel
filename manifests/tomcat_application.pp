@@ -47,9 +47,9 @@ define tomcat7_rhel::tomcat_application(
   }
 
   file { "/etc/init.d/$application_name":
-    ensure => link,
-    target => "/etc/init.d/tomcat7",
-    require => Package['tomcat7']
+    content => template("tomcat7_rhel/etc/init.d/tomcat-application.erb")
+    require => Package['tomcat7'],
+    mode => 0755,
   }
 
   if $tomcat_manager == true {

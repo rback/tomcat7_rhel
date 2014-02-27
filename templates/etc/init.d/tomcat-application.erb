@@ -1,0 +1,48 @@
+#!/bin/bash
+#
+# tomcat7 This shell script takes care of starting and stopping Tomcat
+#
+# chkconfig: - 80 20
+#
+### BEGIN INIT INFO
+# Provides: tomcat7
+# Required-Start: $network $syslog
+# Required-Stop: $network $syslog
+# Default-Start:
+# Default-Stop:
+# Description: Release implementation for Servlet 2.5 and JSP 2.1
+# Short-Description: start and stop tomcat
+### END INIT INFO
+
+
+export CATALINA_BASE=<%= @application_dir%>
+CATALINA_USER=<%= @tomcat_user%>
+PID_FILE=$CATALINA_BASE/temp/catalina.pid
+export CATALINA_HOME=/usr/share/tomcat7
+
+case $1 in
+    start)
+           su -c "$CATALINA_HOME/bin/catalina.sh start" java
+        ;;
+    stop)
+           su -c "$CATALINA_HOME/bin/catalina.sh stop -force" java
+        ;;
+    restart)
+           su -c "$CATALINA_HOME/bin/catalina.sh stop -force" java
+           su -c "$CATALINA_HOME/bin/catalina.sh start" java
+        ;;
+    status)
+          if [ -f $PID_FILE ]; then
+              PID=`cat $PID_FILE`
+              if [ -z "`ps axf | grep ${PID} | grep -v grep`" ]; then
+                  exit 1
+                  printf "%s\n" "Process dead but pidfile exists"
+              else
+                  echo "Running"
+              fi
+          else
+              printf "%s\n" "Service not running"
+              exit 3
+          fi
+        ;;
+esac
