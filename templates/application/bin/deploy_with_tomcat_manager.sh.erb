@@ -17,9 +17,18 @@ fi
 
 VERSIONSTRING=""
 if [ ! -z "$VERSION" ]; then
+  TIMESTAMP=`date +%s`
+  VERSION=$TIMESTAMP-$VERSION
   echo "Using parallel deployment, deploying version $VERSION"
   VERSIONSTRING="&version=$VERSION"
 fi
 
 
-curl --fail -4 -s -u <%=@tomcat_admin_user%>:<%=@tomcat_admin_password%> "http://localhost:<%=@tomcat_port%>/manager/text/deploy?path=/&tag=<%=@application_name%>&war=file:$WAR_FILE&update=true$VERSIONSTRING"
+OUTPUT=$(curl --fail -4 -s -u <%=@tomcat_admin_user%>:<%=@tomcat_admin_password%> "http://localhost:<%=@tomcat_port%>/manager/text/deploy?path=/&tag=<%=@application_name%>&war=file:$WAR_FILE&update=true$VERSIONSTRING")
+echo $OUTPUT
+
+if [[ $OUTPUT == *FAIL* ]]
+then
+  echo "Deployment failed!";
+  exit 1
+fi

@@ -1,0 +1,22 @@
+#!/usr/bin/env ruby
+require 'fileutils'
+
+temp_files_to_keep = %w(
+  catalina.pid
+)
+
+all_temp_files = Dir.glob('<%= @application_dir %>/temp/**/*')
+
+files_to_delete =
+  all_temp_files.reject do |file|
+    is_excluded_file = temp_files_to_keep.include? File.basename(file)
+
+    one_day_ago = Time.new - (60 * 60 * 24)
+    is_accessed_less_than_one_day_ago = File.atime(file) > one_day_ago
+
+    is_excluded_file or is_accessed_less_than_one_day_ago
+  end
+
+files_to_delete.each do |file|
+  FileUtils.rm_rf file
+end

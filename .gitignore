@@ -1,3 +1,6 @@
-pkg
-*.swp
-.project
+*.iml
+.idea
+.bundle
+vendor
+bower_components
+

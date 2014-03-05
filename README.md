@@ -1,5 +1,5 @@
-# Tomcat 7 on RHEL 6 [![Build Status](https://secure.travis-ci.org/laurilehmijoki/tomcat7_rhel.png)]
-(http://travis-ci.org/laurilehmijoki/tomcat7_rhel)
+# Tomcat 7 on RHEL 6
+[![Build Status](http://spode.saunalahti.fi/buildStatus/icon?job=tomcat7_rhel)](http://spode.saunalahti.fi/view/common/job/tomcat7_rhel/)
 
 ## Features
 
@@ -7,10 +7,6 @@
 * Use Tomcat Manager for deployment
 * Use JMX for monitoring the Tomcat instances
 * Use a ready-made smoke test script to test whether your web application is up and running
-
-## Install
-
-    puppet module install llehmijo/tomcat7_rhel
 
 ## Example usage
 
@@ -26,7 +22,7 @@
         tomcat_manager => true,
         tomcat_admin_user => "superuser",
         tomcat_admin_password => "secretpassword",
-        smoke_test_path => "/health-check",
+        smoke_test_path => "/health-check"
         jmx_registry_port => 10054,
         jmx_server_port => 10053
       }
@@ -40,8 +36,6 @@
       }
     }
 
-## Custom configurations
-
 ### Adding extra configuration into the `<Engine>` tag of `server.xml`
 
 You can include additional configuration in the `<Engine>` tag of you
@@ -52,7 +46,7 @@ the `server_xml_engine_config` parameter of `tomcat7_rhel::tomcat_application`.
 For example, you can enable Tomcat 7 session replication with the help of the
 `server_xml_engine_config` parameter. See the example below for more info.
 
-### Enabling session replication
+#### Enabling session replication
 
 Take a look at [Tomcat 7 Clustering/Session Replication HOW-TO](http://tomcat.apache.org/tomcat-7.0-doc/cluster-howto.html).
 
@@ -64,22 +58,8 @@ Full control over the clustering xml fragment can be done conveniently by using 
 
 	server_xml_engine_config => template("mymodule/my_tomcat_cluster_config.erb")
 
-### Specifying allow/deny IPs for Tomcat Manager
+### Deploy
 
-Pass the params `tomcat_manager_allow_ip` and `tomcat_manager_deny_ip` to
-`tomcat7_rhel::tomcat_application`. It will write them into the *manager.xml*
-file.
-
-## Deploy
-
-### Without Tomcat Manager
-
-    scp app.war webuser@superserver:~/app.war
-    ssh webuser@superserver "rm -rf /opt/my-web-application/webapps/*"
-    ssh webuser@superserver "cp ~/app.war /opt/my-web-application/webapps/ROOT.war"
-    ssh webuser@superserver "sudo service my-web-application restart"
-
-### With Tomcat Manager
 
     scp app.war webuser@superserver:/tmp/app.war
     ssh webuser@superserver "/opt/my-web-application/bin/deploy_with_tomcat_manager.sh /tmp/app.war"
@@ -90,7 +70,7 @@ Note that if you deploy with Manager, make sure your application shuts down corr
 You can use the `check_memory_leaks.sh` to find memory leaks. It's under the
 `bin` directory of your web application.
 
-###  Using the parallel deployment feature of Tomcat
+#####  You can also use the parallel deployment feature of Tomcat (http://tomcat.apache.org/tomcat-7.0-doc/config/context.html#Parallel_deployment)
 
     scp app.war webuser@superserver:/tmp/app.war
     ssh webuser@superserver "/opt/my-web-application/bin/deploy_with_tomcat_manager.sh /tmp/app.war 1.2"
@@ -107,31 +87,35 @@ And undeploy an old version of the application:
 
 	ssh webuser@superserver "/opt/my-web-application/bin/undeploy_with_tomcat_manager.sh 1.1"
 
-Here is more info on [Tomcat parallel
-deployment](http://tomcat.apache.org/tomcat-7.0-doc/config/context.html#Parallel_deployment).
-
 ### Run smoke test on the application
 
     ssh webuser@superserver "/opt/my-web-application/bin/run_smoke_test.sh"
 
-### For Hiera users
+### JMX monitoring
 
-From <https://github.com/laurilehmijoki/tomcat7_rhel/pull/22#issuecomment-23689505>:
+* Following JMX keys might be of intereset:
 
-I've added a class tomcat7_rhel::tomcat_instances, which allows users of hiera
-to assign defined types through this class wrapper using for example the
-following yaml (change to json for json users, obviously):
+		jmx["Catalina:type=ThreadPool,name=\"http-apr-8080\"",maxThreads]
+		jmx["Catalina:type=ThreadPool,name=\"http-apr-8080\"",currentThreadsBusy]
+		jmx["Catalina:type=ThreadPool,name=\"http-apr-8080\"",currentThreadCount]
+		jmx["Catalina:type=GlobalRequestProcessor,name=\"http-apr-8080\"",requestCount]
 
-    tomcat7_rhel::tomcat_instances::instances:
-        tomcat-datascience:
-          application_root: /meltwater
-          tomcat_user: www-data
-          jvm_envs: "-server -Xmx128m -Xms128m -XX:MaxPermSize=256m"
-          tomcat_manager: true
-          tomcat_admin_user: superuser
-          tomcat_admin_password: secretpassword
-          tomcat_port: 8080
-          tomcat_control_port: 9080
+		You need to replace http-apr-8080 with port (8080) and engine (apr, bio, nio) that you use.
+
+* You could also monitor sessions:
+
+		jmx["Catalina:type=Manager,context=/,host=localhost",maxActiveSessions]
+		jmx["Catalina:type=Manager,context=/,host=localhost",activeSessions]
+		jmx["Catalina:type=Manager,context=/,host=localhost",maxActive]
+
+		Problems rise if parallel deployment is used, because context will then be
+		something like context=/##1.2.3, which will change during every deploy
+
+## Temp files
+
+To automatically delete the Tomcat temp files, add the parameter
+`auto_delete_tomcat_temp_files = true` into the
+`tomcat7_rhel::tomcat_application` call.
 
 ## Development
 
@@ -139,45 +123,11 @@ following yaml (change to json for json users, obviously):
 
 This project uses [Semantic Versioning](http://semver.org).
 
-### Testing
+### Tests
 
-We test this project with <http://rspec-puppet.com/>.
-
-You can run the tests like this:
-
-    bundle install # Installs the Ruby gems that we use for testing
+    bundle install
     rake
-
-### Creating a release
-
-1. Amend *changelog.md*
-2. Update *Modulefile*
-3. `puppet module build`
-4. Upload to <http://forge.puppetlabs.com/llehmijo/tomcat7_rhel>
 
 ## Links
 
-This project in Puppet Forge:
-<http://forge.puppetlabs.com/llehmijo/tomcat7_rhel>.
-
-## A note about JPackage unstability
-
-Sometimes the indices of the [JPackage Project](http://www.jpackage.org/)
-become corrupted. When that happens, this Puppet module will fail to install
-the Tomcat package.
-
-For example, the indices might point to Tomcat 7.0.34, whereas the mirrors only
-contain the version 7.0.39.
-
-### Verifying that the indices do not work
-
-1. Open <http://mirrors.dotsrc.org/jpackage/6.0/generic/free/RPMS/> and find
-   `tomcat7`
-2. Note the version of the tomcat7 RPM package
-3. Open
-   <http://mirrors.dotsrc.org/jpackage/6.0/generic/free/repodata/filelists.xml.gz>
-   and check if the tomcat7 entry in the `filelists.xml` points to a
-   **different** version that what's available (refer to steps 1 and 2 here)
-4. If the versions do not match, this project does not work. Go do something
-   else!
-5. If the versions match, please notify lauri.lehmijoki@iki.fi
+This project is forked from <https://github.com/laurilehmijoki/tomcat7_rhel>.
