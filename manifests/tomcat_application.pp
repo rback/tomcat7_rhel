@@ -19,11 +19,7 @@ define tomcat7_rhel::tomcat_application(
   $auto_delete_tomcat_temp_files = false
   ) {
 
-  tomcat7_rhel::tomcat7_rhel { "tomcat7_rhel_$title":
-    openjdk_version => $openjdk_version,
-    openjdk_devel_version => $openjdk_devel_version,
-    use_tomcat_native_apr => $use_tomcat_native_apr
-  }
+  include tomcat7_rhel::tomcat7_rhel
 
   $application_dir = "$application_root/$application_name"
   $tomcat_log = "$application_dir/logs/catalina.out"
@@ -92,16 +88,5 @@ define tomcat7_rhel::tomcat_application(
     mode    => 0744,
     require => File["$application_dir/bin"],
     before => Service["$application_name"]
-  }
-
-  if $auto_delete_tomcat_temp_files {
-    file { "/etc/cron.hourly":
-	ensure => directory
-    }
-    file { "/etc/cron.hourly/auto_delete_tomcat_temp_files-$title.rb":
-      content => template("tomcat7_rhel/etc/cron.hourly/auto_delete_tomcat_temp_files.rb.erb"),
-      mode    => 0744,
-      require => File["/etc/cron.hourly"]
-    }
   }
 }
