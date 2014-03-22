@@ -1,8 +1,8 @@
 {
   "name": "tomcat7_rhel",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "ignore": [
-    "*.md",
+    "*.md"
   ],
   "private": "true"
 }
