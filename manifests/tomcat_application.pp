@@ -12,17 +12,12 @@ define tomcat7_rhel::tomcat_application(
   $jmx_registry_port = 10052,
   $jmx_server_port = 10051,
   $smoke_test_path = "/",
-  $server_xml_template = "tomcat7_rhel/application/conf/server.xml.erb",
-  $use_tomcat_native_apr = 'false',
-  $openjdk_version = latest,
-  $openjdk_devel_version = latest,
-  $auto_delete_tomcat_temp_files = false
   ) {
 
   include tomcat7_rhel::tomcat7_rhel
 
   $application_dir = "$application_root/$application_name"
-  $tomcat_log = "$application_dir/logs/catalina.out"
+  $catalina_out = "$application_dir/logs/catalina.out"
   $catalina_home = "/usr/share/tomcat7"
 
   file { [
@@ -50,7 +45,13 @@ define tomcat7_rhel::tomcat_application(
  }
 
   file { "/etc/init.d/$application_name":
-    content => template("tomcat7_rhel/etc/init.d/tomcat-application.erb"),
+    content => template("tomcat7_rhel/etc/init.d/application-initscript.erb"),
+    mode => 0744,
+    before => Service["$application_name"]
+  }
+
+  file { "/etc/sysconfig/$application_name":
+    content => template("tomcat7_rhel/etc/sysconfig/application-sysconfig.erb"),
     mode => 0744,
     before => Service["$application_name"]
   }
@@ -72,12 +73,12 @@ define tomcat7_rhel::tomcat_application(
   }
 
   file { "$application_dir/conf/server.xml":
-    content => template($server_xml_template),
+    content => template("tomcat7_rhel/application/conf/server.xml.erb"),
     before => Service["$application_name"]
   }
 
   file { "/etc/logrotate.d/$application_name":
-    content => template("tomcat7_rhel/etc/logrotate.d/tomcat7.erb"),
+    content => template("tomcat7_rhel/etc/logrotate.d/application-logrotate.erb"),
     before => Service["$application_name"]
   }
 

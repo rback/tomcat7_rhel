@@ -1,9 +1,9 @@
 # Where your tomcat installation lives
+CATALINA_BASE="<%= @application_dir%>"
 CATALINA_TMPDIR="$CATALINA_BASE/temp"
+CATALINA_OUT="<%= @catalina_out %>"
 
-JVM_OPTS="<%= @jvm_envs %>"
-
-JAVA_OPTS="${JAVA_OPTS} ${JVM_OPTS}"
+JAVA_OPTS="${JAVA_OPTS} <%= @jvm_envs %>"
 
 CATALINA_PID=<%= @application_dir%>/temp/catalina.pid
 
