@@ -14,26 +14,22 @@
 # Short-Description: start and stop tomcat
 ### END INIT INFO
 
-
-export CATALINA_BASE=<%= @application_dir%>
-CATALINA_USER=<%= @tomcat_user%>
-PID_FILE=$CATALINA_BASE/temp/catalina.pid
-export CATALINA_HOME=/usr/share/tomcat7
+. /etc/sysconfig/<%= @application_name %>
 
 case $1 in
     start)
-           su -c "$CATALINA_HOME/bin/catalina.sh start" java
+           su -c "<%= @catalina_home %>/bin/catalina.sh start" $CATALINA_USER
         ;;
     stop)
-           su -c "$CATALINA_HOME/bin/catalina.sh stop -force" java
+           su -c "<%= @catalina_home %>/bin/catalina.sh stop -force" $CATALINA_USER
         ;;
     restart)
-           su -c "$CATALINA_HOME/bin/catalina.sh stop -force" java
-           su -c "$CATALINA_HOME/bin/catalina.sh start" java
+           su -c "<%= @catalina_home %>/bin/catalina.sh stop -force" $CATALINA_USER
+           su -c "<%= @catalina_home %>/bin/catalina.sh start" $CATALINA_USER
         ;;
     status)
-          if [ -f $PID_FILE ]; then
-              PID=`cat $PID_FILE`
+          if [ -f $CATALINA_PID ]; then
+              PID=`cat $CATALINA_PID`
               if [ -z "`ps axf | grep ${PID} | grep -v grep`" ]; then
                   exit 1
                   printf "%s\n" "Process dead but pidfile exists"
